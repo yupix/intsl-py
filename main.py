@@ -63,15 +63,13 @@ if what_use == 'create' or what_use == 'c':
         logger.debug('typeが引数で宣言されています')
     else:
         logger.debug('typeが引数で宣言されていません')
-        logger.info('サーバータイプを入力してください')
-        mc_type = input()
+        mc_type = input('サーバータイプを入力してください: ')
     if check_list(mc_type, type_list) == 1: exit('存在しないサーバータイプです')
     if mc_version:
         logger.debug('versionが引数で宣言されています')
     else:
         logger.debug('versionが引数で宣言されていません')
-        logger.info('サーバーバージョンを入力してください')
-        mc_version = input()
+        mc_version = input('サーバーバージョンを入力してください: ')
     hit_list = check_mc_version(mc_type, mc_version)
     if len(hit_list) == 1:
         print(f"""status: {hit_list[0][2]}\nversion: {hit_list[0][0]}""")
@@ -94,18 +92,15 @@ version: {hit_list[1][0]}
                 print('存在しないステータスです')
     input_server_name = None
     while input_server_name is None or len(input_server_name) == 0:
-        logger.info('サーバー名を入力してください')
-        input_server_name = input()
+        input_server_name = input('サーバー名を入力してください: ')
 
     input_server_description = None
     while input_server_description is None or len(input_server_description) == 0:
-        logger.info('サーバーの説明を入力してください')
-        input_server_description = input()
+        input_server_description = input('サーバーの説明を入力してください: ')
 
     input_server_port = None
     while input_server_port is None or not input_server_port.isdigit():
-        logger.info('サーバーのポートを入力してください')
-        input_server_port = input()
+        input_server_port = input('サーバーのポートを入力してください: ')
 
     default_finnal_message = f"""最終確認: 本当に以下の内容で作成してよろしいですか?
 name: {input_server_name}
@@ -136,7 +131,13 @@ version: {mc_version}"""
     session.add(server)
     session.commit()
 
-elif what_use == 'manage' or what_use == 'a':
+elif what_use == 'manage' or what_use == 'm':
+    input_server_name = input()
+    servers = session.query(Server). \
+        filter(Server.name == f'{input_server_name}'). \
+        all()
+    for server in servers:
+        print(f'{server.name} {server.description} {server.port}')
     logger.debug('manage')
 elif what_use == 'delete' or what_use == 'd':
     logger.debug('delete')
