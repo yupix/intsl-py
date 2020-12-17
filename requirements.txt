@@ -1,0 +1,4 @@
+npyscreen
+coloredlogs
+pysqlite3
+sqlalchemy
