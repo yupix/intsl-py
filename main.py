@@ -1,5 +1,7 @@
 import csv
+import os
 import sqlite3
+import urllib.request
 from argparse import ArgumentParser
 from logging import getLogger, StreamHandler, DEBUG, Formatter, addLevelName
 from module.create_logger import easy_logger
@@ -24,7 +26,7 @@ def check_mc_version(mc_type, mc_version):
         reader = csv.reader(f)
         hit_list = []
         for row in reader:
-            if mc_version == row[0]:
+            if mc_version in row[0]:
                 hit_list.append([row[0], row[1], row[2]])
         return hit_list
         # print(hit_list[0][2])
@@ -90,6 +92,8 @@ version: {hit_list[1][0]}
                     break
             else:
                 print('存在しないステータスです')
+    else:
+        exit('存在しないバージョンです')
     input_server_name = None
     while input_server_name is None or len(input_server_name) == 0:
         input_server_name = input('サーバー名を入力してください: ')
@@ -130,6 +134,9 @@ version: {mc_version}"""
     server.description = f'{input_server_description}'
     session.add(server)
     session.commit()
+    if not os.path.exists('server/' + input_server_name):  # ディレクトリがなかったら
+        os.mkdir('server/' + input_server_name)  # 作成したいフォルダ名を作成
+        urllib.request.urlretrieve(use_status[1], "{0}".format('server/' + input_server_name))
 
 elif what_use == 'manage' or what_use == 'm':
     input_server_name = input()
