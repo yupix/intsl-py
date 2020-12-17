@@ -75,6 +75,8 @@ if what_use == 'create' or what_use == 'c':
     hit_list = check_mc_version(mc_type, mc_version)
     if len(hit_list) == 1:
         print(f"""status: {hit_list[0][2]}\nversion: {hit_list[0][0]}""")
+        for i in hit_list:
+            use_status = i
     elif len(hit_list) == 2:
         print(f"""このバージョンには複数のステータスが存在します、statusを入力して選択してください
 status: {hit_list[0][2]}
@@ -136,7 +138,8 @@ version: {mc_version}"""
     session.commit()
     if not os.path.exists('server/' + input_server_name):  # ディレクトリがなかったら
         os.mkdir('server/' + input_server_name)  # 作成したいフォルダ名を作成
-        urllib.request.urlretrieve(use_status[1], "{0}".format('server/' + input_server_name))
+    file = os.path.abspath('server/' + input_server_name)
+    urllib.request.urlretrieve(use_status[1], file + f'/{mc_type}_{mc_version}.jar')
 
 elif what_use == 'manage' or what_use == 'm':
     input_server_name = input()
