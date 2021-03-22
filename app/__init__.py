@@ -1,3 +1,4 @@
+import os
 from logging import getLogger
 
 from halo import Halo
@@ -8,6 +9,8 @@ from sqlalchemy.orm import *
 from sqlalchemy.ext.declarative import declarative_base
 
 # スピナー周り
+from .module.db_manager import DbManager
+
 spinner = Halo(text='Loading', spinner='dots')
 
 spinner.start("プログラムの初期化を開始します")
@@ -19,8 +22,9 @@ logger = EasyLogger(logger, logger_level=f'{logger_level}').create()
 spinner.succeed("ログの初期化")
 
 # データベース周り
-Engine = create_engine('sqlite:///data/database/server.db', encoding="utf-8")  # DEBUG時のみecho=True
+Engine = create_engine('sqlite:///app/db/intsl_py.db', encoding="utf-8")  # DEBUG時のみecho=True
 Session = sessionmaker(bind=Engine)
 session = Session()
 Base = declarative_base()
+db_manager = DbManager(session=session, logger=logger, logger_level=f'info')
 spinner.succeed("データベースの初期化")

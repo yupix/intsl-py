@@ -1,3 +1,4 @@
+import csv
 from importlib import import_module
 
 from app import logger
@@ -17,10 +18,14 @@ class Basic:
 				print(f'使用可能な選択肢: {available_list[:-1]}')
 				print(title)
 				input_content = input()
+				if check_list is not None and input_content in check_list:
+					break
+				elif check_list is None and input_content:
+					break
 			else:
 				input_content = already_input
-			if input_content in check_list:
-				break
+				if input_content in check_list:
+					break
 		return input_content
 
 
