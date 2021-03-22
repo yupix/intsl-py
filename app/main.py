@@ -32,7 +32,7 @@ class Basic:
 class Action:
 	def __init__(self, args):
 		self.args = args
-		self.action_list = {'create': 'app.intsl.create'}
+		self.action_list = {'create': 'app.intsl.create', 'manage': 'app.intsl.manage'}
 
 	async def check(self):
 		logger.debug(self.args)
@@ -42,8 +42,8 @@ class Action:
 			action = {'name': f'{what_use}', 'path': f'{self.action_list[what_use]}'}
 		else:
 			action = None
-
+		class_name = [k for k, v in self.action_list.items() if v == self.action_list[what_use]][0]
 		if action is not None:
 			module = import_module(action['path'])
-			cls = getattr(module, 'Create')(self.args)
+			cls = getattr(module, f'{class_name}'.capitalize())(self.args)
 			await getattr(cls, 'run')()
