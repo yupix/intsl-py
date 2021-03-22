@@ -2,3 +2,4 @@ npyscreen
 coloredlogs
 pysqlite3
 sqlalchemy
+halo
