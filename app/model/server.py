@@ -7,7 +7,7 @@ from app import Base, Engine
 
 class Server(Base):
 	"""
-	ServerMdel
+	ServerModel
 	"""
 	__tablename__ = 'servers'
 	id = Column(Integer, Sequence('server_id_seq'), primary_key=True)
