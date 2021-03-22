@@ -3,3 +3,4 @@ coloredlogs
 pysqlite3
 sqlalchemy
 halo
+alembic
