@@ -51,6 +51,7 @@ class Create:
 			else:
 				exit('存在しないバージョンです')
 
+	@staticmethod
 	async def select_version(self, hit_list):
 		print(f"""このバージョンには複数のステータスが存在します、statusを入力して選択してください
 - status: {hit_list[0][2]}
@@ -70,7 +71,8 @@ class Create:
 				print('存在しないステータスです')
 		return use_status
 
-	async def register(self, mc_server_name: str = None, mc_server_desc: str = None, mc_server_port: int = None, mc_server_type: str = None, mc_version_result=None):
+	@staticmethod
+	async def register(mc_server_name: str = None, mc_server_desc: str = None, mc_server_port: int = None, mc_server_type: str = None, mc_version_result=None):
 		print(f"""最終確認: 登録内容を最後にもう一度よくご確認ください。
 サーバー名: {mc_server_name}
 サーバー概要: {mc_server_desc}
