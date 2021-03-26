@@ -1,8 +1,8 @@
-from sqlalchemy import Column, Integer, String, DateTime, Sequence
 from datetime import datetime
-import sys
 
-from app import Base, Engine
+from sqlalchemy import Column, Integer, String, DateTime, Sequence
+
+from app import Base
 
 
 class Server(Base):
@@ -16,11 +16,3 @@ class Server(Base):
 	description = Column(String(255))
 	created_at = Column('created', DateTime, default=datetime.now, nullable=False)
 	updated_at = Column('modified', DateTime, default=datetime.now, nullable=False)
-
-
-def main(args):
-	Base.metadata.create_all(bind=Engine)
-
-
-if __name__ == "__main__":
-	main(sys.argv)

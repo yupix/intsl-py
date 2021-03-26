@@ -22,6 +22,7 @@ fileConfig(config.config_file_name)
 
 target_models = [
 	'model.server',
+	'model.hash',
 ]
 
 

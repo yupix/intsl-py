@@ -1,7 +1,12 @@
 import csv
+import os
+import re
 
-from app import db_manager
+from sqlalchemy import and_
+
+from app import db_manager, spinner, session
 from app.main import Basic
+from app.model.hash import Hash
 from app.model.server import Server
 
 
@@ -18,9 +23,10 @@ class Create:
 		mc_server_type = self.args.type
 
 		if self.args.type is None:
-			mc_server_type = await self.check_edition()
+			mc_server_type = await Basic().text_input('サーバータイプを入力してください: ', self.editions)
 		else:
 			mc_server_type = await Basic().text_input('サーバータイプを入力してください: ', self.editions, mc_server_type)
+		print(mc_server_type)
 		if self.args.version is None:
 			mc_version = await Basic().text_input("バージョンを入力してください")
 		mc_version_result = await self.check_version(mc_server_type, mc_version)
@@ -29,12 +35,8 @@ class Create:
 		if self.args.desc is None:
 			mc_server_desc = await Basic().text_input("サーバーの概要を入力してください")
 		if self.args.port is None:
-			mc_server_port = await Basic().text_input("サーバーのポートを入力してください")
+			mc_server_port = await Basic().text_input("サーバーのポートを入力してください", return_type=int)
 		await self.register(mc_server_name, mc_server_desc, mc_server_port, mc_server_type, mc_version_result)
-
-	async def check_edition(self):
-		mc_server_type = await Basic().text_input('サーバータイプを入力してください: ', self.editions)
-		return mc_server_type
 
 	async def check_version(self, mc_server_type, mc_version):
 		with open(f'./app/data/{mc_server_type}.csv') as f:
@@ -42,7 +44,7 @@ class Create:
 			hit_list = []
 			for row in reader:
 				if mc_version in row[0]:
-					hit_list.append([row[0], row[1], row[2]])
+					hit_list.append([row[0], row[1], row[2], row[3], row[4]])
 			if len(hit_list) == 1:
 				return hit_list
 			elif len(hit_list) > 1:
@@ -52,7 +54,7 @@ class Create:
 				exit('存在しないバージョンです')
 
 	@staticmethod
-	async def select_version(self, hit_list):
+	async def select_version(hit_list):
 		print(f"""このバージョンには複数のステータスが存在します、statusを入力して選択してください
 - status: {hit_list[0][2]}
 - version: {hit_list[0][0]}
@@ -84,5 +86,33 @@ class Create:
 
 		if y_or_n == 'n':
 			exit('登録をキャンセルしました。')
+
+		spinner.start('キャッシュを確認しています')
+		tmp_path = await Basic().check_tmp()
+		download_file_path = f'{tmp_path}intsl_py/{mc_server_type}/'
+		download_file_name = re.search('https://files.minecraftforge.net/maven/net/minecraftforge/forge/(.*)/(.*)', str(mc_version_result[1])).group(2)
+		if os.path.exists(f'{download_file_path}{mc_server_type}_{mc_version_result[0]}_{mc_version_result[2]}.jar'):
+			spinner.succeed('キャッシュの確認に成功')
+			md5_hash = await Basic().check_md5_hash(f'{download_file_path}{mc_server_type}_{mc_version_result[0]}_{mc_version_result[2]}.jar')
+			check_database = session.query(Hash).filter(and_(Hash.file_name == f'{mc_version_result[0]}_{mc_version_result[2]}.jar', Hash.md5 == md5_hash))
+			if check_database:
+				spinner.succeed('ハッシュの確認に成功')
+			else:
+				spinner.fail('ハッシュの確認に失敗しました。ファイルが改ざんされている可能性があります。安全のためサービスを終了します')
+				exit(1)
+		else:
+			try:
+				os.makedirs(download_file_path)
+				spinner.succeed('フォルダの作成に成功')
+			except FileExistsError:
+				spinner.succeed('フォルダの確認に成功')
+			jar_hash = await Basic().download_file(mc_version_result[1], download_file_path, download_file_name)
+			if jar_hash == mc_version_result[3]:
+				spinner.succeed('ハッシュの確認に成功')
+				os.rename(f'{download_file_path}{download_file_name}', f'{download_file_path}{mc_server_type}_{mc_version_result[0]}_{mc_version_result[2]}.jar')
+				await db_manager.commit(Hash(file_name=f'{mc_version_result[0]}_{mc_version_result[2]}.jar', md5=jar_hash))
+			else:
+				spinner.fail('ハッシュの確認に失敗しました。ファイルが改ざんされている可能性があります。安全のためサービスを終了します')
+				exit(1)
 
 		await db_manager.commit(Server(name=mc_server_name, description=mc_server_desc, port=mc_server_port))
