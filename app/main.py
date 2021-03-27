@@ -54,8 +54,8 @@ class Basic:
 			checksum = hashlib.md5(f.read()).hexdigest()
 			return checksum
 
-	async def create_folder(self, file_path):
-		if not os.path.exists(file_path):
+	async def create_dir(self, file_path):
+		if not os.path.isdir(file_path):
 			os.makedirs(file_path)
 			self.spinner.succeed('ファイルの作成に成功しました')
 		else:
