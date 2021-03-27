@@ -9,9 +9,10 @@ from app import logger, spinner
 
 
 class Basic:
-	def __init__(self):
+	def __init__(self, custom_spinner=None):
 		self.use_os = None
 		self.user_name = None
+		self.spinner = custom_spinner
 
 	async def check_os(self):
 		use_os = os.name
@@ -45,12 +46,21 @@ class Basic:
 		spinner.start('ファイルをダウンロードしています')
 		urllib.request.urlretrieve(url, file_path_name)
 		spinner.succeed('ファイルのダウンロードに成功')
-		await self.check_md5_hash(file_path_name)
+		checksum = await self.check_md5_hash(file_path_name)
+		return checksum
 
 	async def check_md5_hash(self, file_path_name):
 		with open(f'{file_path_name}', 'rb') as f:
 			checksum = hashlib.md5(f.read()).hexdigest()
 			return checksum
+
+	async def create_folder(self, file_path):
+		if not os.path.exists(file_path):
+			os.makedirs(file_path)
+			self.spinner.succeed('ファイルの作成に成功しました')
+		else:
+			self.spinner.succeed('ファイルの確認に成功しました')
+		return 'succeed'
 
 	async def text_input(self, title: str = None, check_list: list = None, already_input: str = None, return_type: type = None):
 		available_list = ''
