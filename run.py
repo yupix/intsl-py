@@ -4,6 +4,7 @@ from app.main import Action
 
 if __name__ == "__main__":
 	parser = ArgumentParser(description='プログラムの説明')
+	parser.add_argument('-a', '--action', type=str)
 	parser.add_argument('--type', type=str)
 	parser.add_argument('-v', '--version')
 	parser.add_argument('-p', '--port', type=int)
