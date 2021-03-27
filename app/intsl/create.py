@@ -1,6 +1,7 @@
 import csv
 import os
 import re
+import shutil
 
 from sqlalchemy import and_
 
@@ -101,11 +102,7 @@ class Create:
 				spinner.fail('ハッシュの確認に失敗しました。ファイルが改ざんされている可能性があります。安全のためサービスを終了します')
 				exit(1)
 		else:
-			try:
-				os.makedirs(download_file_path)
-				spinner.succeed('フォルダの作成に成功')
-			except FileExistsError:
-				spinner.succeed('フォルダの確認に成功')
+			await Basic(spinner).create_dir(download_file_path)
 			jar_hash = await Basic().download_file(mc_version_result[1], download_file_path, download_file_name)
 			if jar_hash == mc_version_result[3]:
 				spinner.succeed('ハッシュの確認に成功')
@@ -114,5 +111,7 @@ class Create:
 			else:
 				spinner.fail('ハッシュの確認に失敗しました。ファイルが改ざんされている可能性があります。安全のためサービスを終了します')
 				exit(1)
+		await Basic(spinner).create_dir(f'./app/server/{mc_server_name}')
+		shutil.copy(f'{download_file_path}{mc_server_type}_{mc_version_result[0]}_{mc_version_result[2]}.jar', f'./app/server/{mc_server_name}/')
 
 		await db_manager.commit(Server(name=mc_server_name, description=mc_server_desc, port=mc_server_port))
