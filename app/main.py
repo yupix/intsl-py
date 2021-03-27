@@ -54,6 +54,13 @@ class Basic:
 			checksum = hashlib.md5(f.read()).hexdigest()
 			return checksum
 
+	async def check_dir(self, file_path):
+		if os.path.isdir(file_path):
+			exist = True
+		else:
+			exist = False
+		return exist
+
 	async def create_dir(self, file_path):
 		if not os.path.isdir(file_path):
 			os.makedirs(file_path)
