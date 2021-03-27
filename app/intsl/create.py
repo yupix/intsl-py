@@ -87,6 +87,9 @@ class Create:
 
 		if y_or_n == 'n':
 			exit('登録をキャンセルしました。')
+		check_dir = await Basic().check_dir(f'./app/server/{mc_server_name}/')
+		if check_dir is True:
+			exit('既に存在する名前です')
 
 		spinner.start('キャッシュを確認しています')
 		tmp_path = await Basic().check_tmp()
@@ -114,4 +117,4 @@ class Create:
 		await Basic(spinner).create_dir(f'./app/server/{mc_server_name}')
 		shutil.copy(f'{download_file_path}{mc_server_type}_{mc_version_result[0]}_{mc_version_result[2]}.jar', f'./app/server/{mc_server_name}/')
 
-		await db_manager.commit(Server(name=mc_server_name, description=mc_server_desc, port=mc_server_port))
+		await db_manager.commit(Server(name=mc_server_name, description=mc_server_desc, port=mc_server_port, path=f'./app/server/{mc_server_name}/'))
