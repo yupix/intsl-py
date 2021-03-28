@@ -15,5 +15,7 @@ class Server(Base):
 	port = Column(Integer)
 	description = Column(String(255))
 	path = Column(String(255))
+	jar_name = Column(String(255))
+	original_jar_name = Column(String(255))
 	created_at = Column('created', DateTime, default=datetime.now, nullable=False)
 	updated_at = Column('modified', DateTime, default=datetime.now, nullable=False)

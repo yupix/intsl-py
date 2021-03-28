@@ -5,7 +5,7 @@ import shutil
 
 from sqlalchemy import and_
 
-from app import db_manager, spinner, session
+from app import db_manager, spinner, session, logger
 from app.main import Basic
 from app.model.hash import Hash
 from app.model.server import Server
@@ -45,9 +45,9 @@ class Create:
 			hit_list = []
 			for row in reader:
 				if mc_version in row[0]:
-					hit_list.append([row[0], row[1], row[2], row[3], row[4]])
+					hit_list.append([row[0], row[1], row[2], row[3]])
 			if len(hit_list) == 1:
-				return hit_list
+				return hit_list[0]
 			elif len(hit_list) > 1:
 				use_status = await self.select_version(hit_list)
 				return use_status
@@ -74,8 +74,7 @@ class Create:
 				print('存在しないステータスです')
 		return use_status
 
-	@staticmethod
-	async def register(mc_server_name: str = None, mc_server_desc: str = None, mc_server_port: int = None, mc_server_type: str = None, mc_version_result=None):
+	async def register(self, mc_server_name: str = None, mc_server_desc: str = None, mc_server_port: int = None, mc_server_type: str = None, mc_version_result=None):
 		print(f"""最終確認: 登録内容を最後にもう一度よくご確認ください。
 サーバー名: {mc_server_name}
 サーバー概要: {mc_server_desc}
@@ -89,32 +88,47 @@ class Create:
 			exit('登録をキャンセルしました。')
 		check_dir = await Basic().check_dir(f'./app/server/{mc_server_name}/')
 		if check_dir is True:
-			exit('既に存在する名前です')
+			logger.error(f'すでに使用されているサーバー名です')
+			exit('Already used server name')
 
 		spinner.start('キャッシュを確認しています')
 		tmp_path = await Basic().check_tmp()
 		download_file_path = f'{tmp_path}intsl_py/{mc_server_type}/'
-		download_file_name = re.search('https://files.minecraftforge.net/maven/net/minecraftforge/forge/(.*)/(.*)', str(mc_version_result[1])).group(2)
+		download_file_name = await self.get_file_name(mc_server_type, mc_version_result)
 		if os.path.exists(f'{download_file_path}{mc_server_type}_{mc_version_result[0]}_{mc_version_result[2]}.jar'):
 			spinner.succeed('キャッシュの確認に成功')
-			md5_hash = await Basic().check_md5_hash(f'{download_file_path}{mc_server_type}_{mc_version_result[0]}_{mc_version_result[2]}.jar')
-			check_database = session.query(Hash).filter(and_(Hash.file_name == f'{mc_version_result[0]}_{mc_version_result[2]}.jar', Hash.md5 == md5_hash))
+			sha1_hash = await Basic().check_sha1_hash(f'{download_file_path}{mc_server_type}_{mc_version_result[0]}_{mc_version_result[2]}.jar')
+			check_database = session.query(Hash).filter(and_(
+				Hash.file_name == f'{mc_version_result[0]}_{mc_version_result[2]}.jar', Hash.sha1 == sha1_hash))
 			if check_database:
 				spinner.succeed('ハッシュの確認に成功')
 			else:
-				spinner.fail('ハッシュの確認に失敗しました。ファイルが改ざんされている可能性があります。安全のためサービスを終了します')
+				spinner.fail(
+					'ハッシュの確認に失敗しました。ファイルが改ざんされている可能性があります。安全のためサービスを終了します')
 				exit(1)
 		else:
 			await Basic(spinner).create_dir(download_file_path)
 			jar_hash = await Basic().download_file(mc_version_result[1], download_file_path, download_file_name)
 			if jar_hash == mc_version_result[3]:
 				spinner.succeed('ハッシュの確認に成功')
-				os.rename(f'{download_file_path}{download_file_name}', f'{download_file_path}{mc_server_type}_{mc_version_result[0]}_{mc_version_result[2]}.jar')
-				await db_manager.commit(Hash(file_name=f'{mc_version_result[0]}_{mc_version_result[2]}.jar', md5=jar_hash))
+				os.rename(f'{download_file_path}{download_file_name}',
+						  f'{download_file_path}{mc_server_type}_{mc_version_result[0]}_{mc_version_result[2]}.jar')
+				await db_manager.commit(Hash(file_name=f'{mc_version_result[0]}_{mc_version_result[2]}.jar', sha1=jar_hash))
 			else:
-				spinner.fail('ハッシュの確認に失敗しました。ファイルが改ざんされている可能性があります。安全のためサービスを終了します')
+				spinner.fail(
+					'ハッシュの確認に失敗しました。ファイルが改ざんされている可能性があります。安全のためサービスを終了します')
 				exit(1)
 		await Basic(spinner).create_dir(f'./app/server/{mc_server_name}')
-		shutil.copy(f'{download_file_path}{mc_server_type}_{mc_version_result[0]}_{mc_version_result[2]}.jar', f'./app/server/{mc_server_name}/')
+		shutil.copy(
+			f'{download_file_path}{mc_server_type}_{mc_version_result[0]}_{mc_version_result[2]}.jar', f'./app/server/{mc_server_name}/')
+		await db_manager.commit(Server(name=mc_server_name, description=mc_server_desc, port=mc_server_port, path=f'./app/server/{mc_server_name}/', jar_name=f'{mc_server_type}_{mc_version_result[0]}_{mc_version_result[2]}.jar', original_jar_name=download_file_name))
 
-		await db_manager.commit(Server(name=mc_server_name, description=mc_server_desc, port=mc_server_port, path=f'./app/server/{mc_server_name}/'))
+	async def get_file_name(self, mc_server_type:str=None, mc_version_result:list=None):
+		if mc_server_type == 'official':
+			download_file_name = 'server.jar'
+		elif mc_server_type == 'forge':
+			download_file_name = re.search(
+				'https://files.minecraftforge.net/maven/net/minecraftforge/forge/(.*)/(.*)', str(mc_version_result[1])).group(2)
+		else:
+			download_file_name = None
+		return download_file_name
