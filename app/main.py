@@ -32,7 +32,7 @@ class Basic:
             user_name = await self.get_os_user_name()
             path = f'C:/Users/{user_name}/AppData/Local/Temp/'
         elif use_os == 'posix':
-            path = '/tmp'
+            path = '/tmp/'
         else:
             path = None
         return path
@@ -46,8 +46,13 @@ class Basic:
         spinner.start('ファイルをダウンロードしています')
         urllib.request.urlretrieve(url, file_path_name)
         spinner.succeed('ファイルのダウンロードに成功')
-        checksum = await self.check_md5_hash(file_path_name)
+        checksum = await self.check_sha1_hash(file_path_name)
         return checksum
+
+    async def check_sha1_hash(self, file_path_name):
+        with open(f'{file_path_name}', 'rb') as f:
+            checksum = hashlib.sha1(f.read()).hexdigest()
+            return checksum
 
     async def check_md5_hash(self, file_path_name):
         with open(f'{file_path_name}', 'rb') as f:
@@ -112,6 +117,7 @@ class Action:
                               'path': f'{self.action_list[what_use]}'}
         else:
             action = None
+        print(action)
         class_name = [k for k, v in self.action_list.items(
         ) if v == self.action_list[what_use]][0]
         if action is not None:
