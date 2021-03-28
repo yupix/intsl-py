@@ -1,3 +1,4 @@
+from app.intsl.setup import Setup
 import csv
 import os
 import re
@@ -9,7 +10,6 @@ from app import db_manager, spinner, session, logger
 from app.main import Basic
 from app.model.hash import Hash
 from app.model.server import Server
-
 
 class Create:
 	def __init__(self, args=None):
@@ -122,6 +122,8 @@ class Create:
 		shutil.copy(
 			f'{download_file_path}{mc_server_type}_{mc_version_result[0]}_{mc_version_result[2]}.jar', f'./app/server/{mc_server_name}/')
 		await db_manager.commit(Server(name=mc_server_name, description=mc_server_desc, port=mc_server_port, path=f'./app/server/{mc_server_name}/', jar_name=f'{mc_server_type}_{mc_version_result[0]}_{mc_version_result[2]}.jar', original_jar_name=download_file_name))
+
+		await Setup(server_name=mc_server_name, server_type=mc_server_type).run()
 
 	async def get_file_name(self, mc_server_type:str=None, mc_version_result:list=None):
 		if mc_server_type == 'official':
