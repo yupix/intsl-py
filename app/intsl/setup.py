@@ -21,6 +21,6 @@ class Setup:
                 command = ['java', '-jar', f'{search_server.jar_name}', '--installServer']
                 proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 proc.wait()
-                spinner.succeed('サーバーのセットアップに成功しました').start('インストラーを削除中')
+                spinner.succeed('サーバーのセットアップに成功しました').start('インストーラーを削除中')
                 os.remove(re.search('forge_(.*)_(.*)', search_server.jar_name).group())
                 spinner.succeed('インストーラーの削除に成功の削除に成功')
