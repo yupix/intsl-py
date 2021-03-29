@@ -117,7 +117,6 @@ class Action:
                               'path': f'{self.action_list[what_use]}'}
         else:
             action = None
-        print(action)
         class_name = [k for k, v in self.action_list.items(
         ) if v == self.action_list[what_use]][0]
         if action is not None:
