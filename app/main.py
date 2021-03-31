@@ -74,7 +74,7 @@ class Basic:
             self.spinner.succeed('ファイルの確認に成功しました')
         return 'succeed'
 
-    async def text_input(self, title: str = None, check_list: list = [], already_input: str = None, return_type: type = None):
+    async def text_input(self, title: str = None, check_list: list = [], already_input: str = None, return_type: type = None, custom_input: str = '>'):
         available_list = ''
         if check_list is not None:
             for _check_list in check_list:
@@ -83,7 +83,10 @@ class Basic:
             if already_input is None:
                 print(f'使用可能な選択肢: {available_list[:-1]}')
                 print(title)
-                input_content = input()
+                try:
+                    input_content = input(custom_input)
+                except EOFError:
+                    input_content = None
                 if return_type:
                     if return_type == str:
                         input_content = str(input_content)
@@ -106,6 +109,7 @@ class Action:
         self.dict_action_list = ['create', 'manage']
 
     async def check(self):
+        spinner.stop()
         logger.debug(self.args)
         print('--------------------------------\n何をするか入力してください\ncreate\nmanage\ndelete\n--------------------------------')
         if not self.args.action:
