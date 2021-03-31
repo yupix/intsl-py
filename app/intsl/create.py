@@ -1,3 +1,4 @@
+import sys
 from app.intsl.setup import Setup
 import csv
 import os
@@ -87,12 +88,12 @@ class Create:
         y_or_n = await Basic().text_input('本当によろしいですか?: ', ['y', 'n'])
 
         if y_or_n == 'n':
-            exit('登録をキャンセルしました。')
+            logger.info('登録をキャンセルしました')
+            sys.exit(0)
         check_dir = await Basic().check_dir(f'./app/server/{mc_server_name}/')
         if check_dir is True:
             logger.error(f'すでに使用されているサーバー名です')
-            exit('Already used server name')
-
+            sys.exit(0)
         spinner.start('キャッシュを確認しています')
         tmp_path = await Basic().check_tmp()
         download_file_path = f'{tmp_path}intsl_py/{mc_server_type}/'
@@ -107,7 +108,7 @@ class Create:
             else:
                 spinner.fail(
                     'ハッシュの確認に失敗しました。ファイルが改ざんされている可能性があります。安全のためサービスを終了します')
-                exit(1)
+                sys.exit(1)
         else:
             await Basic(spinner).create_dir(download_file_path)
             jar_hash = await Basic().download_file(mc_version_result[1], download_file_path, download_file_name)
@@ -119,7 +120,7 @@ class Create:
             else:
                 spinner.fail(
                     'ハッシュの確認に失敗しました。ファイルが改ざんされている可能性があります。安全のためサービスを終了します')
-                exit(1)
+                sys.exit(0)
         await Basic(spinner).create_dir(f'./app/server/{mc_server_name}')
         shutil.copy(
             f'{download_file_path}{mc_server_type}_{mc_version_result[0]}_{mc_version_result[2]}.jar', f'./app/server/{mc_server_name}/')

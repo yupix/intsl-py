@@ -41,7 +41,7 @@ class Basic:
         tmp_dir = tempfile.mkdtemp()
         return tmp_dir
 
-    async def download_file(self, url: str = None, save_path: str = None, file_name: str = None):
+    async def download_file(self, url: str, save_path: str = None, file_name: str = None):
         file_path_name = f'{save_path}{file_name}'
         spinner.start('ファイルをダウンロードしています')
         urllib.request.urlretrieve(url, file_path_name)
@@ -74,7 +74,7 @@ class Basic:
             self.spinner.succeed('ファイルの確認に成功しました')
         return 'succeed'
 
-    async def text_input(self, title: str = None, check_list: list = None, already_input: str = None, return_type: type = None):
+    async def text_input(self, title: str = None, check_list: list = [], already_input: str = None, return_type: type = None):
         available_list = ''
         if check_list is not None:
             for _check_list in check_list:
@@ -109,9 +109,9 @@ class Action:
         logger.debug(self.args)
         print('--------------------------------\n何をするか入力してください\ncreate\nmanage\ndelete\n--------------------------------')
         if not self.args.action:
-            what_use = await Basic().text_input('何をするか入力してください: ', self.dict_action_list)
+            what_use = str(await Basic().text_input('何をするか入力してください: ', self.dict_action_list))
         else:
-            what_use = self.args.action
+            what_use = str(self.args.action)
         if what_use in self.action_list:
             action = {'name': f'{what_use}',
                               'path': f'{self.action_list[what_use]}'}

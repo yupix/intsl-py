@@ -1,11 +1,10 @@
-import os
 from logging import getLogger
 
 from halo import Halo
+from sqlalchemy import create_engine
 
 from .module.create_logger import EasyLogger
-from sqlalchemy import *
-from sqlalchemy.orm import *
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 # スピナー周り
