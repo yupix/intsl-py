@@ -4,3 +4,6 @@ pysqlite3
 sqlalchemy
 halo
 alembic
+beautifulsoup4
+requests
+git+https://github.com/yupix/db-manager
