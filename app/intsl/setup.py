@@ -23,7 +23,7 @@ class Setup:
     async def official(self):
         spinner.start('サーバーをテスト起動中です\n')
         command = ['java', '-jar',
-                   f'{self.search_server.jar_name}']
+                   f'{self.search_server.jar_name}', '--nogui']
         proc = subprocess.Popen(
             command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         while proc.poll() is None:
@@ -64,9 +64,9 @@ class Setup:
         if y_or_n == 'y':
             eula_file_name = 'eula.txt'
             if os.path.exists(eula_file_name):
-                with open(eula_file_name, encoding="utf-8") as f:
+                with open(eula_file_name, 'r') as f:
                     data_lines = f.read()
-                with open(eula_file_name, mode="w", encoding="utf-8") as f:
+                with open(eula_file_name, mode="w") as f:
                     f.write(data_lines.replace('eula=false', 'eula=true'))
             else:
                 exit('同意しない場合は利用できません')
