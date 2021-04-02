@@ -1,3 +1,4 @@
+import os
 from logging import getLogger
 
 from halo import Halo
@@ -17,7 +18,7 @@ spinner.start("プログラムの初期化を開始します")
 logger_level = 'DEBUG'
 logger = getLogger(__name__)
 logger = EasyLogger(logger, logger_level=f'{logger_level}').create()
-spinner.succeed("ログの初期化")
+spinner.succeed("ログの初期化に成功")
 
 # データベース周り
 Engine = create_engine('sqlite:///app/db/intsl_py.db',
@@ -26,4 +27,4 @@ Session = sessionmaker(bind=Engine)
 session = Session()
 Base = declarative_base()
 db_manager = DbManager(session=session, logger=logger, logger_level=f'info')
-spinner.succeed("データベースの初期化")
+spinner.succeed("データベースの初期化に成功")
