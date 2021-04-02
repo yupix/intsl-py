@@ -6,4 +6,4 @@ halo
 alembic
 beautifulsoup4
 requests
-git+https://github.com/yupix/db-manager
+git+https://github.com/yupix/dbmanager
