@@ -8,7 +8,7 @@ import shutil
 from sqlalchemy import and_
 
 from app import db_manager, spinner, session, logger
-from app.main import Basic
+from app.intsl.Basic import Basic
 from app.model.hash import Hash
 from app.model.server import Server
 

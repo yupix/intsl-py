@@ -1,4 +1,4 @@
-from app.main import Basic
+from app.intsl.Basic import Basic
 import os
 import re
 import subprocess
