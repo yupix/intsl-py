@@ -8,6 +8,7 @@ from .module.create_logger import EasyLogger
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from dbmanager import DbManager
+
 # スピナー周り
 
 spinner = Halo(text='Loading', spinner='dots')
