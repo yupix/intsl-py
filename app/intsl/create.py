@@ -26,16 +26,16 @@ class Create:
         mc_server_type = self.args.type
 
         if self.args.type is None:
-            mc_server_type = await Basic().text_input('サーバータイプを入力してください: ', self.editions)
+            mc_server_type = await Basic().text_input('サーバータイプを入力してください: ', self.editions, return_type=str)
         else:
-            mc_server_type = await Basic().text_input('サーバータイプを入力してください: ', self.editions, mc_server_type)
+            mc_server_type = await Basic().text_input('サーバータイプを入力してください: ', self.editions, mc_server_type, return_type=str)
         if self.args.version is None:
-            mc_version = await Basic().text_input("バージョンを入力してください")
+            mc_version = await Basic().text_input("バージョンを入力してください", return_type=str)
         mc_version_result = await self.check_version(mc_server_type, mc_version)
         if self.args.name is None:
-            mc_server_name = await Basic().text_input("サーバー名を入力してください")
+            mc_server_name = await Basic().text_input("サーバー名を入力してください", return_type=str)
         if self.args.desc is None:
-            mc_server_desc = await Basic().text_input("サーバーの概要を入力してください")
+            mc_server_desc = await Basic().text_input("サーバーの概要を入力してください", return_type=str)
         if self.args.port is None:
             mc_server_port = await Basic().text_input("サーバーのポートを入力してください", return_type=int)
         await self.register(mc_server_name, mc_server_desc, mc_server_port, mc_server_type, mc_version_result)
@@ -110,7 +110,7 @@ class Create:
                     'ハッシュの確認に失敗しました。ファイルが改ざんされている可能性があります。安全のためサービスを終了します')
                 sys.exit(1)
         else:
-            await Basic(spinner).create_dir(download_file_path)
+            await Basic().create_dir(download_file_path)
             jar_hash = await Basic().download_file(mc_version_result[1], download_file_path, download_file_name)
             if jar_hash == mc_version_result[3]:
                 spinner.succeed('ハッシュの確認に成功')
@@ -121,7 +121,7 @@ class Create:
                 spinner.fail(
                     'ハッシュの確認に失敗しました。ファイルが改ざんされている可能性があります。安全のためサービスを終了します')
                 sys.exit(0)
-        await Basic(spinner).create_dir(f'./app/server/{mc_server_name}')
+        await Basic().create_dir(f'./app/server/{mc_server_name}')
         shutil.copy(
             f'{download_file_path}{mc_server_type}_{mc_version_result[0]}_{mc_version_result[2]}.jar', f'./app/server/{mc_server_name}/')
         await db_manager.commit(Server(name=mc_server_name, description=mc_server_desc, port=mc_server_port, path=f'./app/server/{mc_server_name}/', jar_name=f'{mc_server_type}_{mc_version_result[0]}_{mc_version_result[2]}.jar', original_jar_name=download_file_name))
