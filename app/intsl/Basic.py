@@ -5,12 +5,13 @@ import platform
 import tempfile
 import urllib.request
 
+from app import spinner
+
 
 class Basic:
-	def __init__(self, custom_spinner=None):
+	def __init__(self):
 		self.use_os = None
 		self.user_name = None
-		self.spinner = custom_spinner
 
 	async def check_os(self):
 		use_os = os.name
@@ -67,9 +68,9 @@ class Basic:
 	async def create_dir(self, file_path):
 		if not os.path.isdir(file_path):
 			os.makedirs(file_path)
-			self.spinner.succeed('ファイルの作成に成功しました')
+			spinner.succeed('ファイルの作成に成功しました')
 		else:
-			self.spinner.succeed('ファイルの確認に成功しました')
+			spinner.succeed('ファイルの確認に成功しました')
 		return 'succeed'
 
 	async def text_input(self, title: str = None, check_list: list = [], already_input: str = None, return_type: type = None, custom_input: str = '>'):
@@ -88,8 +89,10 @@ class Basic:
 				if return_type:
 					if return_type == str:
 						input_content = str(input_content)
+						break
 				elif return_type == int:
 					input_content = int(input_content)
+					break
 				if check_list is not None and input_content in check_list or check_list is None and input_content:
 					break
 			else:
