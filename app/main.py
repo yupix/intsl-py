@@ -4,6 +4,7 @@ from importlib import import_module
 from app import logger, spinner
 from app.intsl.Basic import Basic
 from app.intsl.Migrate import Migrate
+from app.intsl.firstsetup import FirstSetup
 
 
 class Action:
@@ -15,10 +16,8 @@ class Action:
 
 	async def check(self):
 		spinner.stop()
-		logger.debug(self.args)
-		if not os.path.exists('./db/intsl_py.db'):
-			self.first_launch()
-
+		if not os.path.exists('./app/db/intsl_py.db'):
+			FirstSetup().first_launch()
 		if self.args.migrate is True:
 			command = ['alembic', 'revision', '--autogenerate', '-m', '\"init\"']
 			Migrate(command).generate()
@@ -39,13 +38,3 @@ class Action:
 			module = import_module(action['path'])
 			cls = getattr(module, f'{class_name}'.capitalize())(self.args)
 			await getattr(cls, 'run')()
-
-	def first_launch(self):
-		print("""██╗███╗   ██╗████████╗███████╗██╗         ██████╗ ██╗   ██╗
-██║████╗  ██║╚══██╔══╝██╔════╝██║         ██╔══██╗╚██╗ ██╔╝
-██║██╔██╗ ██║   ██║   ███████╗██║         ██████╔╝ ╚████╔╝ 
-██║██║╚██╗██║   ██║   ╚════██║██║         ██╔═══╝   ╚██╔╝  
-██║██║ ╚████║   ██║   ███████║███████╗    ██║        ██║   
-╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚══════╝    ╚═╝        ╚═╝   """)
-		print('INTSL PYへようこそ')
-
