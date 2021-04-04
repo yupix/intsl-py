@@ -86,13 +86,17 @@ class Basic:
 					input_content = input(custom_input)
 				except EOFError:
 					input_content = None
+
 				if return_type:
 					if return_type == str:
 						input_content = str(input_content)
 						break
-				elif return_type == int:
-					input_content = int(input_content)
-					break
+					elif return_type == int:
+						try:
+							input_content = int(input_content)
+							break
+						except ValueError:
+							print('有効な数値ではありません')
 				if check_list is not None and input_content in check_list or check_list is None and input_content:
 					break
 			else:
