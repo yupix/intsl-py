@@ -4,6 +4,7 @@ import os
 import platform
 import tempfile
 import urllib.request
+from urllib.error import HTTPError, URLError
 
 from app import spinner
 
@@ -26,14 +27,8 @@ class Basic:
 		return user_name
 
 	async def check_tmp(self):
-		use_os = await self.check_os()
-		if use_os == 'nt':
-			user_name = await self.get_os_user_name()
-			path = f'C:/Users/{user_name}/AppData/Local/Temp/'
-		elif use_os == 'posix':
-			path = '/tmp/'
-		else:
-			path = None
+		# Use tempfile.gettempdir() for a more robust way to get the temporary directory
+		path = tempfile.gettempdir()
 		return path
 
 	async def create_tmp_dir(self):
@@ -43,10 +38,15 @@ class Basic:
 	async def download_file(self, url: str, save_path: str = None, file_name: str = None):
 		file_path_name = f'{save_path}{file_name}'
 		spinner.start('ファイルをダウンロードしています')
-		urllib.request.urlretrieve(url, file_path_name)
-		spinner.succeed('ファイルのダウンロードに成功')
-		checksum = await self.check_sha1_hash(file_path_name)
-		return checksum
+		try:
+			urllib.request.urlretrieve(url, file_path_name)
+			spinner.succeed('ファイルのダウンロードに成功')
+			checksum = await self.check_sha1_hash(file_path_name)
+			return checksum
+		except (HTTPError, URLError) as e:
+			spinner.fail(f'ファイルのダウンロードに失敗しました: {e}')
+			# print(f"Error details: {e}") # Optional: for more detailed console logging if needed
+			return None
 
 	async def check_sha1_hash(self, file_path_name):
 		with open(f'{file_path_name}', 'rb') as f:
@@ -74,13 +74,14 @@ class Basic:
 		return 'succeed'
 
 	async def text_input(self, title: str = None, check_list: list = [], already_input: str = None, return_type: type = None, custom_input: str = '>'):
-		available_list = ''
-		if check_list is not None:
-			for _check_list in check_list:
-				available_list += _check_list + ', '
+		# Correctly format and display the available choices if check_list is provided and not empty
+		if check_list:  # This handles both None and empty list []
+			available_list_display = ", ".join(check_list)
+			print(f'使用可能な選択肢: {available_list_display}')
+
 		while True:
 			if already_input is None:
-				print(f'使用可能な選択肢: {available_list[:-1]}')
+				# The title is printed regardless of check_list to prompt for input
 				print(title)
 				try:
 					input_content = input(custom_input)

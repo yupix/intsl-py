@@ -15,6 +15,8 @@ class FirstSetup:
 ╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚══════╝    ╚═╝        ╚═╝   """)
 		print('INTSL PYへようこそ！初回起動の為少々セットアップに時間がかかる可能性があります...')
 		spinner.start('データベースの作成を行います')
-		command = ['alembic', 'revision', '--autogenerate', '-m', '\"init\"']
-		Migrate(command).generate()
+		# Ensure the database schema is created and up-to-date based on existing migrations
+		Migrate(['alembic', 'upgrade', 'head']).generate()
+		# Then, generate the initial revision if necessary
+		Migrate(['alembic', 'revision', '--autogenerate', '-m', 'Initial auto-generated revision']).generate()
 		spinner.succeed('データベースの作成に成功しました')
